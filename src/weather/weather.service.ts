@@ -9,6 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { RedisService } from 'src/redis/redis.service';
 import { GetWeatherDto, WeatherResponse } from './dto/weather.dto';
 import { firstValueFrom } from 'rxjs';
+import { safeAwaitWithStatus } from 'src/utils/safe-await.util';
 
 @Injectable()
 export class WeatherService {
@@ -34,18 +35,24 @@ export class WeatherService {
     const cacheKey = this.generateCacheKey('current', dto);
 
     const cachedData = await this.getCachedWeather(cacheKey);
+
     if (cachedData) {
       return cachedData;
     }
 
-    // Fetch from API
+
     const url = this.buildApiUrl(dto.location, dto.date, dto.unitGroup);
-    const weatherData = await this.fetchWeatherData(url);
+    const [weatherData, fetchError] = await safeAwaitWithStatus(
+      this.fetchWeatherData(url)
+    );
 
-    // Cache the result
-    await this.cacheWeatherData(cacheKey, weatherData);
+    if (fetchError) {
+      throw fetchError; // Re-throw API errors as they're critical
+    }
 
-    return weatherData;
+    await this.cacheWeatherData(cacheKey, weatherData!)
+
+    return weatherData!;
   }
 
   async getWeatherForecast(dto: GetWeatherDto): Promise<WeatherResponse> {
