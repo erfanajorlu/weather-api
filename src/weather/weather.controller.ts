@@ -1,34 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Query, ValidationPipe } from '@nestjs/common';
 import { WeatherService } from './weather.service';
-import { CreateWeatherDto } from './dto/create-weather.dto';
-import { UpdateWeatherDto } from './dto/update-weather.dto';
+import { GetWeatherDto, WeatherResponse } from './dto/weather.dto';
 
 @Controller('weather')
 export class WeatherController {
   constructor(private readonly weatherService: WeatherService) {}
 
-  @Post()
-  create(@Body() createWeatherDto: CreateWeatherDto) {
-    return this.weatherService.create(createWeatherDto);
+  @Get('current')
+  async getCurrentWeather(
+    @Query(new ValidationPipe({ transform: true })) dto: GetWeatherDto,
+  ): Promise<WeatherResponse> {
+    return this.weatherService.getCurrentWeather(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.weatherService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.weatherService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWeatherDto: UpdateWeatherDto) {
-    return this.weatherService.update(+id, updateWeatherDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.weatherService.remove(+id);
+  @Get('forecast')
+  async getWeatherForecast(
+    @Query(new ValidationPipe({ transform: true })) dto: GetWeatherDto,
+  ): Promise<WeatherResponse> {
+    return this.weatherService.getWeatherForecast(dto);
   }
 }
