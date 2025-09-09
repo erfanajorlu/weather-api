@@ -26,6 +26,8 @@ export class WeatherService {
     this.baseUrl = this.configService.get('weather.baseUrl')!;
     this.apiKey = this.configService.get('weather.apiKey')!;
 
+    console.log('WeatherService initialized with baseUrl:', this.baseUrl);
+    console.log(`Weather key: ${this.apiKey}`);
     if (!this.apiKey) {
       throw new Error('Weather API key is required');
     }
@@ -39,7 +41,6 @@ export class WeatherService {
     if (cachedData) {
       return cachedData;
     }
-
 
     const url = this.buildApiUrl(dto.location, dto.date, dto.unitGroup);
     const [weatherData, fetchError] = await safeAwaitWithStatus(
@@ -89,6 +90,8 @@ export class WeatherService {
     unitGroup = 'metric',
     endDate?: string,
   ): string {
+    console.log('Building API URL with:', { location, startDate, unitGroup, endDate });
+    console.log('Base URL:', this.baseUrl);
     let url = `${this.baseUrl}/${encodeURIComponent(location)}`;
 
     if (startDate) {
@@ -101,6 +104,7 @@ export class WeatherService {
     const params = new URLSearchParams({
       key: this.apiKey,
       unitGroup,
+      contentType: 'json',
       include: 'current,days',
       elements:
         'datetime,temp,tempmax,tempmin,humidity,conditions,description,icon,windspeed,winddir,pressure,visibility,uvindex,sunrise,sunset',
