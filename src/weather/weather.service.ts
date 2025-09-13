@@ -44,14 +44,14 @@ export class WeatherService {
 
     const url = this.buildApiUrl(dto.location, dto.date, dto.unitGroup);
     const [weatherData, fetchError] = await safeAwaitWithStatus(
-      this.fetchWeatherData(url)
+      this.fetchWeatherData(url),
     );
 
     if (fetchError) {
       throw fetchError; // Re-throw API errors as they're critical
     }
 
-    await this.cacheWeatherData(cacheKey, weatherData!)
+    await this.cacheWeatherData(cacheKey, weatherData!);
 
     return weatherData!;
   }
@@ -90,7 +90,12 @@ export class WeatherService {
     unitGroup = 'metric',
     endDate?: string,
   ): string {
-    console.log('Building API URL with:', { location, startDate, unitGroup, endDate });
+    console.log('Building API URL with:', {
+      location,
+      startDate,
+      unitGroup,
+      endDate,
+    });
     console.log('Base URL:', this.baseUrl);
     let url = `${this.baseUrl}/${encodeURIComponent(location)}`;
 
